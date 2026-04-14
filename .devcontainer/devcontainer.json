@@ -1,0 +1,54 @@
+{
+  "capAdd": [
+    "SYS_PTRACE"
+  ],
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "charliermarsh.ruff",
+        "ms-python.autopep8",
+        "ms-python.isort",
+        "ms-python.mypy-type-checker",
+        "ms-python.pylint",
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "streetsidesoftware.code-spell-checker",
+        "usernamehw.errorlens"
+      ],
+      "settings": {
+        "editor.bracketPairColorization.enabled": true,
+        "editor.comments.insertSpace": true,
+        "editor.detectIndentation": false,
+        "editor.insertSpaces": true,
+        "editor.snippetSuggestions": "top",
+        "editor.tabCompletion": "on",
+        "editor.tabSize": 2,
+        "editor.trimAutoWhitespace": true,
+        "explorer.confirmDelete": false,
+        "extensions.ignoreRecommendations": true,
+        "files.associations": {
+          "*.code-snippets": "jsonc"
+        },
+        "files.autoSave": "afterDelay",
+        "files.eol": "auto",
+        "files.exclude": {
+          "**/.vscode": true
+        },
+        "remote.downloadExtensionsLocally": false,
+        "search.exclude": {
+          "**/*.code-search": true,
+          "**/*.git": true,
+          "**/*.vscode-server": true,
+          "**/bower_components": true,
+          "**/node_modules": true
+        },
+        "workbench.startupEditor": "none"
+      }
+    }
+  },
+  "image": "mcr.microsoft.com/devcontainers/python:3.12",
+  "runArgs": [
+    "--rm",
+    "--name=vsc-${localEnv:USER}-${containerWorkspaceFolderBasename}-${devcontainerId}"
+  ]
+}
