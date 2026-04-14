@@ -28,33 +28,39 @@ flow-bricks is a Streamlit-based web application designed to simplify the manage
 ### Setup
 
 1. **Clone the repository:**
+
    ```bash
    git clone https://github.com/anupmika/flow-bricks.git
    cd flow-bricks
    ```
 
 2. **Create a virtual environment (recommended):**
+
    ```bash
    python -m venv venv
    source venv/bin/activate  # On Windows: venv\Scripts\activate
    ```
 
 3. **Install dependencies:**
+
    ```bash
    pip install -e .
    ```
 
 4. **Configure Databricks credentials:**
    - Set environment variables:
+
      ```bash
      export DATABRICKS_HOST="https://your-workspace.cloud.databricks.com"
      export DATABRICKS_TOKEN="your-personal-access-token"
      ```
+
    - Or use Databricks CLI configuration
 
 ## Usage
 
 1. **Run the application:**
+
    ```bash
    streamlit run src/app.py
    ```
@@ -68,12 +74,14 @@ flow-bricks is a Streamlit-based web application designed to simplify the manage
 ### Setup Development Environment
 
 1. **Install development tools:**
+
    ```bash
    pip install pre-commit
    pre-commit install
    ```
 
 2. **Run linting and formatting:**
+
    ```bash
    pre-commit run --all-files
    ```
