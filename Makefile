@@ -2,6 +2,7 @@
 
 TOP_DIR := $(shell git rev-parse --show-toplevel)
 SRC_DIR := "$(TOP_DIR)/src"
+APP_PY  := "$(SRC_DIR)/app.py"
 
 all: clean sync run
 
@@ -9,10 +10,10 @@ sync:
 	@uv sync --no-cache
 
 debug: sync
-	@uv run streamlit run "$(SRC_DIR)/app.py" --server.runOnSave true
+	@uv run streamlit run "$(APP_PY)" --server.runOnSave true
 
 run: sync
-	@uv run streamlit run "$(SRC_DIR)/app.py"
+	@uv run streamlit run "$(APP_PY)"
 
 test: sync
 	@echo "No tests available currently."
