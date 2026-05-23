@@ -11,6 +11,7 @@ st.title('Smart Data Pipeline Manager using Databricks APIs')
 
 if not st.session_state.is_processed:
     with st.form('uploader_form'):
+        db_host = st.text_input('Databricks Host URL', placeholder='https://your-workspace.cloud.databricks.com')
         db_token = st.text_input('Databricks Token', type='password', placeholder='')
         uploaded_files = st.file_uploader(
             'Upload any file', type=None, accept_multiple_files=False
@@ -21,7 +22,9 @@ if not st.session_state.is_processed:
             submitted = st.form_submit_button('Submit', use_container_width=True)
 
     if submitted:
-        if not db_token:
+        if not db_host:
+            st.error('Please enter your Databricks Host URL.')
+        elif not db_token:
             st.error('Please enter your Databricks Token.')
         elif not uploaded_files:
             st.warning('Please upload a file.')
@@ -30,7 +33,7 @@ if not st.session_state.is_processed:
             with st.spinner('Processing through Databricks...'):
                 try:
                     w = WorkspaceClient(
-                        host='https://dbc-3f896ab2-0af4.cloud.databricks.com',
+                        host=db_host,
                         token=db_token,
                     )
 
@@ -54,7 +57,9 @@ if not st.session_state.is_processed:
                     run_id = run_info.run_id
 
                     # 3. Polling Loop
-                    while True:
+                    max_wait_seconds = 3600  # 1 hour timeout
+                    elapsed = 0
+                    while elapsed < max_wait_seconds:
                         run_status = w.jobs.get_run(run_id)
                         current_state = str(
                             run_status.state.life_cycle_state.value
@@ -72,6 +77,10 @@ if not st.session_state.is_processed:
                                 st.stop()
                             break
                         time.sleep(5)
+                        elapsed += 5
+                    else:
+                        st.error('Job timed out after 1 hour.')
+                        st.stop()
 
                     # 4. FIXED DOWNLOAD LOGIC
                     status_container.write(
@@ -82,17 +91,16 @@ if not st.session_state.is_processed:
                     files_list = list(w.files.list_directory_contents(output_path))
                     target_file_path = None
 
-                    # Logic: Spark folder ke andar asli file dhoondna
+                    # Logic: find the real data file inside the Spark output folder
+                    skip_suffixes = ('_success', '_committed', '_started', '.crc')
                     for f in files_list:
                         f_path = f.path.lower()
-                        # Metadata/Folder skip karo, asli data file uthao
-                        if not f_path.endswith('_success') and not f_path.endswith('/'):
-                            # Agar file part- se shuru ho ya extension match kare
-                            if 'part-' in f_path or any(
-                                ext in f_path for ext in ['.csv', '.xlsx', '.json']
-                            ):
-                                target_file_path = f.path
-                                break
+                        if f_path.endswith('/') or any(f_path.endswith(s) for s in skip_suffixes):
+                            continue
+                        # Accept any data file (part files, parquet, csv, etc.)
+                        if 'part-' in f_path or '.' in f_path.rsplit('/', 1)[-1]:
+                            target_file_path = f.path
+                            break
 
                     if target_file_path:
                         status_container.write('Downloading processed file...')
@@ -106,8 +114,11 @@ if not st.session_state.is_processed:
                             f"Processed file not found in {output_path}. Ensure Notebook uses coalesce(1)."
                         )
 
-                except Exception as e:
+                except (ValueError, IOError, RuntimeError) as e:
                     st.error(f"Error: {e}")
+                except Exception as e:
+                    st.error(f"Unexpected error: {e}")
+                    raise
 
 else:
     st.success('✅ Processing Complete!')
