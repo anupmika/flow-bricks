@@ -1,5 +1,3 @@
-#!/usr/bin/make -f
-
 TOP_DIR := $(shell git rev-parse --show-toplevel)
 SRC_DIR := "$(TOP_DIR)/src"
 APP_PY  := "$(SRC_DIR)/app.py"
@@ -21,3 +19,5 @@ test: sync
 clean:
 	@uv clean
 	@rm -rf __pycache__ .pytest_cache .mypy_cache .venv
+
+.PHONY: all sync debug run test clean
