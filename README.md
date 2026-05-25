@@ -1,6 +1,8 @@
 # flow-bricks
 
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![pre-commit.ci status](https://results.pre-commit.ci/badge/github/anupmika/flow-bricks/main.svg)](https://results.pre-commit.ci/latest/github/anupmika/flow-bricks/main)
+[![Quality gate](https://sonarcloud.io/api/project_badges/quality_gate?project=anupmika_flow-bricks)](https://sonarcloud.io/summary/new_code?id=anupmika_flow-bricks)
 
 Data Engineering Pipeline Manager with Databricks API Integration
 
