@@ -88,7 +88,7 @@ flow-bricks is a Streamlit-based web application designed to simplify the manage
 
 ### Project Structure
 
-```
+```tree
 flow-bricks/
 ├── src/                    # Source code
 ├── .streamlit/            # Streamlit configuration
