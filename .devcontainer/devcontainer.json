@@ -1,4 +1,7 @@
 {
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
   "capAdd": [
     "SYS_PTRACE"
   ],
@@ -8,6 +11,7 @@
         "astral-sh.ty",
         "charliermarsh.ruff",
         "ms-python.python",
+        "kilocode.Kilo-Code",
         "streetsidesoftware.code-spell-checker",
         "usernamehw.errorlens"
       ],
@@ -42,9 +46,8 @@
       }
     }
   },
-  "image": "mcr.microsoft.com/devcontainers/python:3.12",
+  "postCreateCommand": "chmod +x ${containerWorkspaceFolder}/.devcontainer/postCreateScript.sh && ${containerWorkspaceFolder}/.devcontainer/postCreateScript.sh",
   "runArgs": [
-    "--init",
     "--rm",
     "--name=vsc-${localEnv:USER}-${containerWorkspaceFolderBasename}-${devcontainerId}"
   ]
