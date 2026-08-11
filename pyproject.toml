@@ -1,0 +1,10 @@
+[project]
+name = "flow-bricks"
+version = "0.1.0"
+description = "An app to manage Databricks workflows and pipelines."
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "databricks-sdk>=0.96.0",
+    "streamlit>=1.55.0",
+]
