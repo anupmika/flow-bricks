@@ -1,7 +1,7 @@
 repos:
   # Syncs pre-commit dependencies with the latest versions.
   - repo: https://github.com/mxr/sync-pre-commit-deps
-    rev: "v0.0.4"
+    rev: "v0.0.5"
     hooks:
       - id: sync-pre-commit-deps
   # Pre-commit hooks for general file checks
@@ -44,12 +44,12 @@ repos:
       - id: python-use-type-annotations
   # Runs mypy to check Python type annotations.
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: "v2.3.0"
+    rev: "v2.3.1"
     hooks:
       - id: mypy
   # ShellCheck hook for linting shell scripts
   - repo: https://github.com/shellcheck-py/shellcheck-py
-    rev: "v0.11.0.1"
+    rev: "v0.11.0.1-1"
     hooks:
       - id: shellcheck
         name: shellcheck
@@ -76,7 +76,7 @@ repos:
       - id: yamlfmt
   # Codespell for detecting common misspellings in code
   - repo: https://github.com/codespell-project/codespell
-    rev: "v2.4.2"
+    rev: "v2.4.3"
     hooks:
       - id: codespell
   # Checkmake for linting Makefiles
@@ -86,7 +86,7 @@ repos:
       - id: checkmake
   # SQLFluff for linting and fixing SQL files
   - repo: https://github.com/sqlfluff/sqlfluff
-    rev: "4.2.2"
+    rev: "4.3.0"
     hooks:
       - id: sqlfluff-lint
       - id: sqlfluff-fix
@@ -103,7 +103,7 @@ repos:
         entry: cmd --githook pre-commit
   # Markdownlint for linting Markdown files
   - repo: https://github.com/DavidAnson/markdownlint-cli2
-    rev: v0.23.0
+    rev: v0.23.3
     hooks:
       - id: markdownlint-cli2
         args: [--fix]
