@@ -1,27 +1,31 @@
 TOP_DIR := `git rev-parse --show-toplevel`
 SRC_DIR := TOP_DIR / "src"
-APP_PY  := SRC_DIR / "app.py"
+APP_PY := SRC_DIR / "app.py"
 
-# Default recipe (runs when you just type 'just')
+[private]
+default:
+    @just --list --justfile {{justfile()}}
+
+# Run the full development workflow: clean, sync, and start the app
 all: clean sync run
 
-# Sync dependencies using uv
+# Install or update project dependencies with `uv`
 sync:
     @uv sync --no-cache
 
-# Run streamlit in debug mode
+# Run Streamlit with automatic reload when source files change
 debug: sync
-    @uv run streamlit run {{APP_PY}} --server.runOnSave true
+    @uv run streamlit run {{ APP_PY }} --server.runOnSave true
 
-# Standard run
+# Run Streamlit in standard mode
 run: sync
-    @uv run streamlit run {{APP_PY}}
+    @uv run streamlit run {{ APP_PY }}
 
-# Placeholder for tests
+# Run the test target (no tests are currently configured)
 test: sync
     @echo "No tests available currently."
 
-# Clean up environment and caches
+# Remove the local environment and generated Python caches
 clean:
     @uv clean
     @rm -rf __pycache__ .pytest_cache .mypy_cache .venv
