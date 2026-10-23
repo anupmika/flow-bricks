@@ -3,7 +3,7 @@ from typing import Optional
 import pandas as pd
 
 
-def remove_nulls(df: pd.DataFrame, how: str = "any", threshold: Optional[int] = None) -> pd.DataFrame:
+def remove_nulls(df: pd.DataFrame, how: str = 'any', threshold: Optional[int] = None) -> pd.DataFrame:
     """Remove rows with null values.
 
     how: 'any' drops rows with any null; 'all' drops rows where all values are null.
@@ -14,7 +14,7 @@ def remove_nulls(df: pd.DataFrame, how: str = "any", threshold: Optional[int] = 
     return df.dropna(how=how)
 
 
-def remove_duplicates(df: pd.DataFrame, subset: Optional[list] = None, keep: str = "first") -> pd.DataFrame:
+def remove_duplicates(df: pd.DataFrame, subset: Optional[list] = None, keep: str = 'first') -> pd.DataFrame:
     """Remove duplicate rows."""
     return df.drop_duplicates(subset=subset, keep=keep)
 
@@ -22,7 +22,7 @@ def remove_duplicates(df: pd.DataFrame, subset: Optional[list] = None, keep: str
 def strip_column_names(df: pd.DataFrame) -> pd.DataFrame:
     """Strip whitespace and lowercase column names."""
     df = df.copy()
-    df.columns = [str(c).strip().lower().replace(" ", "_") for c in df.columns]
+    df.columns = [str(c).strip().lower().replace(' ', '_') for c in df.columns]
     return df
 
 
@@ -31,7 +31,7 @@ def clean_dataframe(
     remove_null_rows: bool = True,
     remove_dup_rows: bool = True,
     clean_columns: bool = True,
-    null_how: str = "any",
+    null_how: str = 'any',
 ) -> pd.DataFrame:
     """Apply a standard cleaning pipeline to a DataFrame."""
     if clean_columns:
@@ -45,7 +45,7 @@ def clean_dataframe(
 
 def to_csv_bytes(df: pd.DataFrame) -> bytes:
     """Serialize DataFrame to CSV bytes."""
-    return df.to_csv(index=False).encode("utf-8")
+    return df.to_csv(index=False).encode('utf-8')
 
 
 def to_excel_bytes(df: pd.DataFrame) -> bytes:
@@ -53,7 +53,6 @@ def to_excel_bytes(df: pd.DataFrame) -> bytes:
     import io
 
     buffer = io.BytesIO()
-    df.to_excel(buffer, index=False, engine="openpyxl")
+    df.to_excel(buffer, index=False, engine='openpyxl')
     buffer.seek(0)
     return buffer.read()
-
