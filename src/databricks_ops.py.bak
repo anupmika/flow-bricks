@@ -1,0 +1,98 @@
+import os
+from typing import Optional, Tuple, List
+
+from databricks.connect import DatabricksSession
+from databricks.sdk import WorkspaceClient
+from dotenv import load_dotenv
+
+load_dotenv()
+
+CATALOG = os.getenv("DATABRICKS_CATALOG", "main")
+BRONZE_SCHEMA = os.getenv("DATABRICKS_BRONZE_SCHEMA", "bronze")
+SILVER_SCHEMA = os.getenv("DATABRICKS_SILVER_SCHEMA", "silver")
+VOLUME_PATH = os.getenv("DATABRICKS_VOLUME_PATH", f"/Volumes/{CATALOG}/{BRONZE_SCHEMA}/cleaned")
+
+
+def get_spark():
+    """Establish and return a Databricks Serverless Spark session."""
+    return DatabricksSession.builder.serverless().getOrCreate()
+
+
+def get_workspace() -> WorkspaceClient:
+    """Return a Databricks WorkspaceClient."""
+    load_dotenv()
+    return WorkspaceClient()
+
+
+def full_table_name(schema: str, table_name: str) -> str:
+    """Build a fully-qualified Unity Catalog table name."""
+    return f"{CATALOG}.{schema}.{table_name}"
+
+
+def pandas_to_spark(spark, pandas_df):
+    """Convert a pandas DataFrame to a Spark DataFrame."""
+    return spark.createDataFrame(pandas_df)
+
+
+def spark_to_pandas(spark_df):
+    """Convert a Spark DataFrame to pandas."""
+    return spark_df.toPandas()
+
+
+def write_to_table(spark_df, schema: str, table_name: str, mode: str = "overwrite") -> str:
+    """Write a Spark DataFrame to a Unity Catalog Delta table."""
+    full = full_table_name(schema, table_name)
+    spark_df.write.format("delta").mode(mode).saveAsTable(full)
+    return full
+
+
+def write_to_bronze(spark_df, table_name: str, mode: str = "overwrite") -> str:
+    """Write a Spark DataFrame to the bronze layer in Unity Catalog."""
+    return write_to_table(spark_df, BRONZE_SCHEMA, table_name, mode)
+
+
+def write_to_silver(spark_df, table_name: str, mode: str = "overwrite") -> str:
+    """Write a Spark DataFrame to the silver (cleaned) layer in Unity Catalog."""
+    return write_to_table(spark_df, SILVER_SCHEMA, table_name, mode)
+
+
+def clean_spark_dataframe(
+    spark_df,
+    remove_null_rows: bool = True,
+    null_how: str = "any",
+    remove_dup_rows: bool = True,
+    clean_columns: bool = True,
+):
+    """Apply cleaning on Databricks compute via Spark DataFrame operations.
+
+    - remove_null_rows: drop rows with nulls (how='any' or 'all')
+    - remove_dup_rows: drop duplicate rows
+    - clean_columns: strip whitespace, lowercase, replace spaces with underscores
+    """
+    df = spark_df
+
+    if clean_columns:
+        new_cols = [str(c).strip().lower().replace(" ", "_") for c in df.columns]
+        df = df.toDF(*new_cols)
+
+    if remove_null_rows:
+        df = df.na.drop(how=null_how)
+
+    if remove_dup_rows:
+        df = df.dropDuplicates()
+
+    return df
+
+
+def read_table_to_pandas(spark, schema: str, table_name: str):
+    """Read a Unity Catalog Delta table back into a pandas DataFrame."""
+    full = full_table_name(schema, table_name)
+    return spark.table(full).toPandas()
+
+
+def upload_to_volume(workspace: WorkspaceClient, file_bytes: bytes, volume_path: str, filename: str) -> str:
+    """Upload raw file bytes to a Databricks Volume and return the full path."""
+    volume_path = volume_path.rstrip("/")
+    full_path = f"{volume_path}/{filename}"
+    workspace.files.upload(full_path, file_bytes, overwrite=True)
+    return full_path
