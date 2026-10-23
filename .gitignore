@@ -212,3 +212,4 @@ data/
 *.parquet
 *.csv
 *.json
+*.bak
