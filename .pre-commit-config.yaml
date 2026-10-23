@@ -107,3 +107,8 @@ repos:
     hooks:
       - id: markdownlint-cli2
         args: [--fix]
+  # Justfile checker for linting Justfiles
+  - repo: https://github.com/instrumentl/pre-commit-just
+    rev: "v0.2"
+    hooks:
+      - id: check-justfile
