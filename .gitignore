@@ -9,4 +9,5 @@ tmp/
 data/
 *.parquet
 *.csv
+*.json
 .ruff_cache/

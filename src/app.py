@@ -1,222 +1,141 @@
 import streamlit as st
-import pandas as pd
-import io
-import os
+import time
+from databricks.sdk import WorkspaceClient
 
-from databricks_ops import (
-    get_spark,
-    get_workspace,
-    pandas_to_spark,
-    write_to_bronze,
-    write_to_silver,
-    upload_to_volume,
-    CATALOG,
-    BRONZE_SCHEMA,
-    SILVER_SCHEMA,
-    VOLUME_PATH,
-)
-from cleaning import clean_dataframe, to_csv_bytes, to_excel_bytes
+if 'is_processed' not in st.session_state:
+    st.session_state.is_processed = False
+    st.session_state.processed_data = None
+    st.session_state.file_name = ''
 
+st.title('Smart Data Pipeline Manager using Databricks APIs')
 
-def read_uploaded_file(file_bytes: bytes, filename: str, file_format: str) -> pd.DataFrame:
-    """Read uploaded file bytes into a pandas DataFrame."""
-    buffer = io.BytesIO(file_bytes)
-    if file_format == "csv":
-        return pd.read_csv(buffer)
-    if file_format in ("xls", "xlsx"):
-        return pd.read_excel(buffer)
-    raise ValueError(f"Unsupported file format: .{file_format}")
-
-
-st.set_page_config(page_title="Medallion Data Lakehouse", layout="wide")
-
-st.title("Medallion Data Lakehouse")
-st.caption("Upload local file  |  Clean  |  Save to Databricks Catalog + Volumes  |  Download")
-
-# ---------------------------------------------------------------------------
-# Session state defaults
-# ---------------------------------------------------------------------------
-for key, default in {
-    "spark": None,
-    "workspace": None,
-    "df_raw": None,
-    "df_cleaned": None,
-    "file_name": "uploaded_file",
-    "file_format": "csv",
-    "cleaned_filename": "cleaned_file.csv",
-}.items():
-    if key not in st.session_state:
-        st.session_state[key] = default
-
-# ---------------------------------------------------------------------------
-# Sidebar: Databricks config
-# ---------------------------------------------------------------------------
-with st.sidebar:
-    st.header("Databricks")
-    catalog = st.text_input("Catalog", value=os.getenv("DATABRICKS_CATALOG", "main"))
-    bronze_schema = st.text_input("Bronze schema", value=os.getenv("DATABRICKS_BRONZE_SCHEMA", "bronze"))
-    silver_schema = st.text_input("Silver schema", value=os.getenv("DATABRICKS_SILVER_SCHEMA", "silver"))
-    volume_path = st.text_input(
-        "Volume path",
-        value=os.getenv("DATABRICKS_VOLUME_PATH", f"/Volumes/{catalog}/{bronze_schema}/cleaned"),
-        help="Databricks Volume path to store cleaned files.",
-    )
-
-    os.environ["DATABRICKS_CATALOG"] = catalog
-    os.environ["DATABRICKS_BRONZE_SCHEMA"] = bronze_schema
-    os.environ["DATABRICKS_SILVER_SCHEMA"] = silver_schema
-    os.environ["DATABRICKS_VOLUME_PATH"] = volume_path
-
-    if st.button("Connect to Databricks", type="primary"):
-        with st.spinner("Establishing Databricks Spark session..."):
-            try:
-                spark = get_spark()
-                workspace = get_workspace()
-                st.session_state.spark = spark
-                st.session_state.workspace = workspace
-                st.success("Connected to Databricks")
-            except Exception as e:
-                st.error(f"Connection failed: {e}")
-
-    st.divider()
-    st.header("Upload File")
-    uploaded = st.file_uploader(
-        "Choose a file (.csv, .xls, .xlsx)",
-        type=["csv", "xls", "xlsx"],
-        accept_multiple_files=False,
-    )
-    if uploaded is not None:
-        file_bytes = uploaded.read()
-        st.session_state.file_name = uploaded.name
-        ext = uploaded.name.rsplit(".", 1)[-1].lower()
-        st.session_state.file_format = ext
-        st.session_state.uploaded_bytes = file_bytes
-        st.success(f"Selected {uploaded.name}")
-
-# ---------------------------------------------------------------------------
-# Main
-# ---------------------------------------------------------------------------
-if st.session_state.spark is None:
-    st.info("Connect to Databricks from the sidebar to begin.")
-    st.stop()
-
-spark = st.session_state.spark
-workspace = st.session_state.workspace
-
-st.subheader("1. Load uploaded file")
-col_load, col_sep = st.columns([1, 3])
-with col_load:
-    if st.button("Load file", type="primary", disabled="uploaded_bytes" not in st.session_state):
-        with st.spinner("Reading uploaded file..."):
-            try:
-                df = read_uploaded_file(
-                    st.session_state.uploaded_bytes, st.session_state.file_name, st.session_state.file_format
-                )
-                st.session_state.df_raw = df
-                st.success(f"Loaded {df.shape[0]} rows x {df.shape[1]} columns")
-            except Exception as e:
-                st.error(f"Failed to read file: {e}")
-
-# ---------------------------------------------------------------------------
-# Raw preview
-# ---------------------------------------------------------------------------
-if st.session_state.df_raw is not None:
-    df_raw = st.session_state.df_raw
-    st.subheader("2. Raw data preview")
-    st.dataframe(df_raw.head(20), width="stretch")
-    st.caption(f"Shape: {df_raw.shape[0]} rows x {df_raw.shape[1]} columns")
-
-    # -----------------------------------------------------------------------
-    # Cleaning options
-    # -----------------------------------------------------------------------
-    st.subheader("3. Cleaning options")
-    c1, c2, c3 = st.columns(3)
-    with c1:
-        remove_nulls = st.checkbox("Remove null rows", value=True)
-        null_how = st.selectbox("Null removal mode", options=["any", "all"], index=0)
-    with c2:
-        remove_dups = st.checkbox("Remove duplicate rows", value=True)
-    with c3:
-        clean_cols = st.checkbox("Clean column names (strip/lowercase/underscore)", value=True)
-
-    if st.button("Run cleaning", type="primary"):
-        with st.spinner("Cleaning data..."):
-            df_cleaned = clean_dataframe(
-                df_raw,
-                remove_null_rows=remove_nulls,
-                remove_dup_rows=remove_dups,
-                clean_columns=clean_cols,
-                null_how=null_how,
-            )
-            st.session_state.df_cleaned = df_cleaned
-            st.success(f"Cleaned: {df_cleaned.shape[0]} rows x {df_cleaned.shape[1]} columns")
-
-    # -----------------------------------------------------------------------
-    # Cleaned preview & outputs
-    # -----------------------------------------------------------------------
-    if st.session_state.df_cleaned is not None:
-        df_cleaned = st.session_state.df_cleaned
-        st.subheader("4. Cleaned data preview")
-        st.dataframe(df_cleaned.head(20), width="stretch")
-        st.caption(f"Shape: {df_cleaned.shape[0]} rows x {df_cleaned.shape[1]} columns")
-
-        base_name = st.session_state.file_name
-        st.session_state.cleaned_filename = st.text_input(
-            "Cleaned file name",
-            value=f"{base_name}_cleaned.{st.session_state.file_format}",
+if not st.session_state.is_processed:
+    with st.form('uploader_form'):
+        db_host = st.text_input(
+            label='Databricks Host URL',
+            placeholder='https://your-workspace.cloud.databricks.com',
+        )
+        db_token = st.text_input('Databricks Token', type='password', placeholder='')
+        uploaded_files = st.file_uploader(
+            label='Upload any file', type=None, accept_multiple_files=False
         )
 
-        st.subheader("5. Save & Download")
-        col_bronze, col_silver, col_volume, col_dl = st.columns(4)
+        col1, col2, col3 = st.columns([1, 2, 1])
+        with col2:
+            submitted = st.form_submit_button('Submit', use_container_width=True)
 
-        with col_bronze:
-            if st.button("Save raw to Bronze"):
-                with st.spinner("Writing raw to Databricks Bronze..."):
-                    try:
-                        spark_df = pandas_to_spark(spark, df_raw)
-                        table = write_to_bronze(spark_df, f"raw_{base_name}")
-                        st.success(f"Raw saved to {table}")
-                    except Exception as e:
-                        st.error(f"Bronze write failed: {e}")
+    if submitted:
+        if not db_host:
+            st.error(body='Please enter your Databricks Host URL.')
+        elif not db_token:
+            st.error(body='Please enter your Databricks Token.')
+        elif not uploaded_files:
+            st.warning('Please upload a file.')
+        else:
+            status_container = st.empty()
+            with st.spinner('Processing through Databricks...'):
+                try:
+                    w = WorkspaceClient(
+                        host=db_host,
+                        token=db_token,
+                    )
 
-        with col_silver:
-            if st.button("Save cleaned to Silver"):
-                with st.spinner("Writing cleaned to Databricks Silver..."):
-                    try:
-                        spark_df = pandas_to_spark(spark, df_cleaned)
-                        table = write_to_silver(spark_df, f"cleaned_{base_name}")
-                        st.success(f"Cleaned saved to {table}")
-                    except Exception as e:
-                        st.error(f"Silver write failed: {e}")
+                    file_name = uploaded_files.name
+                    base_path = '/Volumes/workspace/default/my_data_engineering'
+                    raw_path = f"{base_path}/{file_name}"
+                    output_path = f"{base_path}/cleaned_{file_name}"
 
-        with col_volume:
-            if st.button("Save cleaned to Volume"):
-                with st.spinner("Uploading cleaned file to Databricks Volume..."):
-                    try:
-                        ext = st.session_state.cleaned_filename.rsplit(".", 1)[-1].lower()
-                        if ext == "csv":
-                            payload = to_csv_bytes(df_cleaned)
-                        else:
-                            payload = to_excel_bytes(df_cleaned)
-                        full_path = upload_to_volume(
-                            workspace, payload, volume_path, st.session_state.cleaned_filename
+                    # 1. Upload
+                    w.files.upload(raw_path, uploaded_files, overwrite=True)
+
+                    # 2. Trigger Job
+                    run_info = w.jobs.run_now(
+                        job_id=188709504602239,
+                        notebook_params={
+                            'input_path': raw_path,
+                            'output_path': output_path,
+                        },
+                    )
+
+                    run_id = run_info.run_id
+
+                    # 3. Polling Loop
+                    max_wait_seconds = 3600  # 1 hour timeout
+                    elapsed = 0
+                    while elapsed < max_wait_seconds:
+                        run_status = w.jobs.get_run(run_id)
+                        current_state = str(
+                            run_status.state.life_cycle_state.value
+                        ).upper()
+                        status_container.write(f"Current Status: {current_state}")
+
+                        if current_state in ['TERMINATED', 'SKIPPED', 'INTERNAL_ERROR']:
+                            res_state = (
+                                str(run_status.state.result_state.value).upper()
+                                if run_status.state.result_state
+                                else ''
+                            )
+                            if res_state == 'FAILED':
+                                st.error('Databricks Job Failed. Check logs.')
+                                st.stop()
+                            break
+                        time.sleep(5)
+                        elapsed += 5
+                    else:
+                        st.error('Job timed out after 1 hour.')
+                        st.stop()
+
+                    # 4. FIXED DOWNLOAD LOGIC
+                    status_container.write(
+                        'Finalizing and searching for processed file...'
+                    )
+                    time.sleep(5)  # Spark/Volume consistency wait
+
+                    files_list = list(w.files.list_directory_contents(output_path))
+                    target_file_path = None
+
+                    # Logic: find the real data file inside the Spark output folder
+                    skip_suffixes = ('_success', '_committed', '_started', '.crc')
+                    for f in files_list:
+                        f_path = f.path.lower()
+                        if f_path.endswith('/') or any(
+                            f_path.endswith(s) for s in skip_suffixes
+                        ):
+                            continue
+                        # Accept any data file (part files, parquet, csv, etc.)
+                        if 'part-' in f_path or '.' in f_path.rsplit('/', 1)[-1]:
+                            target_file_path = f.path
+                            break
+
+                    if target_file_path:
+                        status_container.write('Downloading processed file...')
+                        download_res = w.files.download(target_file_path)
+                        st.session_state.processed_data = download_res.contents.read()
+                        st.session_state.file_name = f"cleaned_{file_name}"
+                        st.session_state.is_processed = True
+                        st.rerun()
+                    else:
+                        st.error(
+                            f"Processed file not found in {output_path}. Ensure Notebook uses coalesce(1)."
                         )
-                        st.success(f"Saved to Volume: {full_path}")
-                    except Exception as e:
-                        st.error(f"Volume write failed: {e}")
 
-        with col_dl:
-            ext = st.session_state.cleaned_filename.rsplit(".", 1)[-1].lower()
-            if ext == "csv":
-                payload = to_csv_bytes(df_cleaned)
-                mime = "text/csv"
-            else:
-                payload = to_excel_bytes(df_cleaned)
-                mime = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-            st.download_button(
-                label="Download cleaned file",
-                data=payload,
-                file_name=st.session_state.cleaned_filename,
-                mime=mime,
-                type="primary",
-            )
+                except (ValueError, IOError, RuntimeError) as e:
+                    st.error(f"Error: {e}")
+                except Exception as e:
+                    st.error(f"Unexpected error: {e}")
+                    raise
+
+else:
+    st.success('✅ Processing Complete!')
+    st.download_button(
+        label='📥 Download Processed File',
+        data=st.session_state.processed_data,
+        file_name=st.session_state.file_name,
+        mime='application/octet-stream',
+        use_container_width=True,
+    )
+
+    if st.button('Upload Another File'):
+        st.session_state.is_processed = False
+        st.session_state.processed_data = None
+        st.rerun()

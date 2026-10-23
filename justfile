@@ -1,16 +1,25 @@
 TOP_DIR := `git rev-parse --show-toplevel`
 SRC_DIR := TOP_DIR / "src"
+APP_PY := SRC_DIR / "app.py"
 
 [private]
 default:
     @just --list --justfile {{justfile()}}
 
-# Run the setup development environment: clean, sync
-all: clean sync
+# Run the full development workflow: clean, sync, and start the app
+all: clean sync run
 
 # Install or update project dependencies with `uv`
 sync:
     @uv sync --no-cache
+
+# Run Streamlit with automatic reload when source files change
+debug: sync
+    @uv run streamlit run {{ APP_PY }} --server.runOnSave true
+
+# Run Streamlit in standard mode
+run: sync
+    @uv run streamlit run {{ APP_PY }}
 
 # Run the test target (no tests are currently configured)
 test: sync
