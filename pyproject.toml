@@ -10,3 +10,22 @@ dependencies = [
     "python-dotenv",
     "streamlit",
 ]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+    "pytest-cov>=7.1.0",
+]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+addopts = "--cov --cov-report=term-missing"
+
+[tool.coverage.run]
+source = ["src"]
+data_file = "coverage/.coverage"
+omit = ["*/tests/*"]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = false
