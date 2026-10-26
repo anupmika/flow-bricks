@@ -49,7 +49,7 @@ repos:
       - id: mypy
   # ShellCheck hook for linting shell scripts
   - repo: https://github.com/shellcheck-py/shellcheck-py
-    rev: "v0.11.0.1-1"
+    rev: "v0.11.0.1"
     hooks:
       - id: shellcheck
         name: shellcheck
@@ -92,7 +92,7 @@ repos:
       - id: sqlfluff-fix
   # Gitleaks for detecting secrets in Git repositories
   - repo: https://github.com/gitleaks/gitleaks
-    rev: "v8.30.0"
+    rev: "v8.30.1"
     hooks:
       - id: gitleaks
   # Talisman for pre-commit Git hooks to detect sensitive files
