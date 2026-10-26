@@ -1,0 +1,16 @@
+# Configuration reference: https://docs.streamlit.io/develop/api-reference/configuration/config.toml
+
+[theme]
+base="dark"
+font="sans serif"
+
+[client]
+toolbarMode = "minimal"
+showErrorDetails = "none"
+
+[server]
+headless = false
+fileWatcherType = "watchdog"
+
+[browser]
+gatherUsageStats = false
