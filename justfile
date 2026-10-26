@@ -28,9 +28,9 @@ run: sync
     --server.headless=true \
     --server.address=0.0.0.0
 
-# Run the test target
+# Run tests with verbose output
 test: sync
-    @uv run --group dev pytest {{ TESTS_DIR }} -v --no-cov
+   @uv run --group dev pytest {{ TESTS_DIR }} -v --no-cov
 
 # Run tests with coverage report
 coverage: sync
