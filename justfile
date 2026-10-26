@@ -2,7 +2,7 @@ TOP_DIR := `git rev-parse --show-toplevel`
 SRC_DIR := TOP_DIR / "src"
 TESTS_DIR := TOP_DIR / "tests"
 COV_DIR := TOP_DIR / "coverage"
-APP_PY := SRC_DIR / "app.py"
+APP_PY := SRC_DIR / "main.py"
 
 [private]
 default:
