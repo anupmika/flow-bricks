@@ -9,7 +9,7 @@ toolbarMode = "minimal"
 showErrorDetails = "none"
 
 [server]
-headless = false
+headless = true
 fileWatcherType = "watchdog"
 
 [browser]
