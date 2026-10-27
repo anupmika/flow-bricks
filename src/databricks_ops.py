@@ -5,7 +5,7 @@ from databricks.sdk import WorkspaceClient
 from dotenv import load_dotenv
 from pathlib import Path
 
-load_dotenv(Path(__file__).with_name(".env"))
+load_dotenv(Path(__file__).with_name('.env'))
 
 CATALOG = os.getenv('DATABRICKS_CATALOG', 'main')
 BRONZE_SCHEMA = os.getenv('DATABRICKS_BRONZE_SCHEMA', 'bronze')
@@ -23,7 +23,7 @@ def get_spark():
 
 def get_workspace() -> WorkspaceClient:
     """Return a Databricks WorkspaceClient."""
-    load_dotenv(Path(__file__).with_name(".env"))
+    load_dotenv(Path(__file__).with_name('.env'))
     return WorkspaceClient()
 
 
