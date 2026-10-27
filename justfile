@@ -16,7 +16,7 @@ sync:
     @uv sync --no-cache --quiet
 
 # Run Streamlit with automatic reload when source files change
-debug: sync
+dev: sync
     @uv run streamlit run {{ APP_PY }} \
     --server.runOnSave true \
     --server.headless=false \
@@ -49,6 +49,6 @@ codecov-tests: sync
 
 # Remove the local environment and generated Python caches
 clean:
-    @uv clean
+    @uv clean --quiet --force
     @rm -rf __pycache__ .pytest_cache .mypy_cache .venv {{ COV_DIR }}
     @find . -type d \( -name "__pycache__" -o -name ".pytest_cache" -o -name ".mypy_cache" \) -prune -exec rm -rf {} +
