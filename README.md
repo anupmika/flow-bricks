@@ -41,7 +41,7 @@ cp src/.env.example src/.env
 just dev
 ```
 
-Note: App runs at http://localhost:8501.
+Note: App runs at <http://localhost:8501>.
 
 ## Environment variables
 
