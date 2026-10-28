@@ -15,6 +15,9 @@ jobs:
       fail-fast: false
       matrix:
         python-version: ["3.12", "3.13", "3.14", "3.15"]
+        # pyarrow (transitive via streamlit) has no wheels/prebuilt for Python 3.15 yet
+        exclude:
+          - python-version: "3.15"
     steps:
       - uses: actions/checkout@v7
       - name: Set up Python ${{ matrix.python-version }}
