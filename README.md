@@ -1,4 +1,9 @@
-# flow-bricks
+# 🏗️ Flow-Bricks
+
+[![Streamlit](https://img.shields.io/badge/Streamlit-FF4B4B?logo=streamlit&logoColor=white)](https://anupmika-flow-bricks.streamlit.app/)
+[![Python](https://img.shields.io/badge/python-3.12+-blue?logo=python)](https://www.python.org/)
+[![codecov](https://codecov.io/gh/anupmika/flow-bricks/graph/badge.svg?token=8MRBO573K2)](https://codecov.io/gh/anupmika/flow-bricks)
+[![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue)](LICENSE)
 
 Medallion Data Lakehouse manager built with Streamlit and the Databricks SDK.
 Upload local CSV/Excel files, clean them, and persist results to Databricks
@@ -36,7 +41,7 @@ cp src/.env.example src/.env
 just dev
 ```
 
-App runs at <http://localhost:8501>.
+Note: App runs at http://localhost:8501.
 
 ## Environment variables
 
