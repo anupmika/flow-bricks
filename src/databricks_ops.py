@@ -1,9 +1,9 @@
 import os
+from pathlib import Path
 
 from databricks.connect import DatabricksSession
 from databricks.sdk import WorkspaceClient
 from dotenv import load_dotenv
-from pathlib import Path
 
 load_dotenv(Path(__file__).with_name('.env'))
 
