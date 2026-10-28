@@ -26,7 +26,7 @@ addopts = "--cov --cov-report=term-missing"
 [tool.coverage.run]
 source = ["src"]
 data_file = "coverage/.coverage"
-omit = ["*/tests/*"]
+omit = ["*/tests/*", "*/app.py"]
 
 [tool.coverage.report]
 show_missing = true
