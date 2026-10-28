@@ -1,21 +1,20 @@
-import os
 from unittest.mock import MagicMock, patch
 
 from databricks_ops import (
-    CATALOG,
     BRONZE_SCHEMA,
+    CATALOG,
+    DRIVE_CONNECTION,
     SILVER_SCHEMA,
     VOLUME_PATH,
-    DRIVE_CONNECTION,
     drive_file_url,
     get_spark,
     get_workspace,
+    pandas_to_spark,
     read_drive_file,
     spark_to_pandas,
-    pandas_to_spark,
+    upload_to_volume,
     write_to_bronze,
     write_to_silver,
-    upload_to_volume,
 )
 
 
@@ -71,7 +70,7 @@ def test_pandas_to_spark():
 
 def test_write_to_bronze():
     spark_df = MagicMock()
-    with patch('databricks_ops.get_spark') as gs:
+    with patch('databricks_ops.get_spark'):
         result = write_to_bronze(spark_df, 't', 'overwrite')
         assert result == f"{CATALOG}.{BRONZE_SCHEMA}.t"
         spark_df.write.format.return_value.mode.return_value.saveAsTable.assert_called()
@@ -79,7 +78,7 @@ def test_write_to_bronze():
 
 def test_write_to_silver():
     spark_df = MagicMock()
-    with patch('databricks_ops.get_spark') as gs:
+    with patch('databricks_ops.get_spark'):
         result = write_to_silver(spark_df, 't', 'overwrite')
         assert result == f"{CATALOG}.{SILVER_SCHEMA}.t"
 
