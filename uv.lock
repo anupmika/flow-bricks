@@ -463,7 +463,7 @@ wheels = [
 
 [[package]]
 name = "databricks-connect"
-version = "19.3.0"
+version = "19.4.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "databricks-sdk" },
@@ -480,7 +480,7 @@ dependencies = [
     { name = "zstandard" },
 ]
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/a6/d0/5844968916c892cda8ee0ee5a77b420c65d39566ee26be36cb93b1088207/databricks_connect-19.3.0-py2.py3-none-any.whl", hash = "sha256:fae901a453c2eb8da0259abcd48d8117c6d552b4907b5058afabe093b8fc1fc4", size = 3253318, upload-time = "2026-10-23T22:39:56.526Z" },
+    { url = "https://files.pythonhosted.org/packages/6c/ee/cd7e04585f40b9ef7e1271d0348860686b218af3b5876d773ceeb36aac35/databricks_connect-19.4.0-py2.py3-none-any.whl", hash = "sha256:42ffe660eabea050a6f5d10c2bc18122e2c2ff2e5eb51416879cc90d8e7aac61", size = 3397236, upload-time = "2026-11-20T21:24:00.38Z" },
 ]
 
 [[package]]
