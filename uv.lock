@@ -485,7 +485,7 @@ wheels = [
 
 [[package]]
 name = "databricks-sdk"
-version = "0.165.0"
+version = "0.171.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "certifi" },
@@ -494,9 +494,9 @@ dependencies = [
     { name = "requests" },
     { name = "urllib3" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/cc/71/efbebc178b5106c7e1785f0da6d8cd7562a8c161571e194cd986e82c678e/databricks_sdk-0.165.0.tar.gz", hash = "sha256:1d4d47f0d1f1002e285bd65c00463de6af5104dc7bca5a8a29d531ca29bc4f34", size = 1263175, upload-time = "2026-11-11T06:30:53.556Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/14/f8/2f3253a2c81709a3162d11306abb807454d9e12b2f47acc743a76071dc14/databricks_sdk-0.171.0.tar.gz", hash = "sha256:8ce4bb80cf1c97c4d05d884e5d335b1e63d208c94f328ac292551db6f8850202", size = 1372881, upload-time = "2026-11-25T05:25:17.343Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/65/9a/3119976cf164efebc97097710cb9bc84160cb77839ac85ebd496451cb9a8/databricks_sdk-0.165.0-py3-none-any.whl", hash = "sha256:f3a790ea12888e5e83dd72271896e37498e9635b12f3c4d459ec86e8683de113", size = 1205400, upload-time = "2026-11-11T06:30:51.605Z" },
+    { url = "https://files.pythonhosted.org/packages/ba/b0/a37d59eb87e70146f1f1f60e9d9c3e6bd19e448f32491b9ceb3e03c06bc7/databricks_sdk-0.171.0-py3-none-any.whl", hash = "sha256:0efed3de4340a9e84c1d7899ab99bca43bb548bffb29236cef85ed99b09040be", size = 1316201, upload-time = "2026-11-25T05:25:15.473Z" },
 ]
 
 [[package]]
